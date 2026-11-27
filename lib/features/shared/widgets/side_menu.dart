@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +26,7 @@ class SideMenuState extends ConsumerState<SideMenu> {
     final userImage = ref.watch(userImageProvider);
 
     final profileImage= userImage != null
-        ? FileImage(userImage ) as ImageProvider
+        ? MemoryImage(userImage) as ImageProvider
         : authState.userPhotoProfile?.image;
 
     return NavigationDrawer(
@@ -104,6 +103,7 @@ class SideMenuState extends ConsumerState<SideMenu> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CustomFilledButton(
               onPressed: () {
+                ref.read(userImageProvider.notifier).clear();
                 ref.read(authProvider.notifier).logout(null);
               },
               text: 'Cerrar sesión'),
