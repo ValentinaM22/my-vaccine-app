@@ -50,11 +50,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // state =state.copyWith(user: user, authStatus: AuthStatus.authenticated)
   }
 
-  Future registerUser(RegisterUserRequest registerUserRequest) async {
+  /// Registra al usuario y, si sale bien, inicia sesión automáticamente.
+  /// Devuelve null si todo salió bien o el mensaje de error para mostrarlo en pantalla.
+  Future<String?> registerUser(RegisterUserRequest registerUserRequest) async {
     try {
-      final user = await authRepository.register(registerUserRequest);
-      _setLoggedUser(user);
-    } catch (e) {}
+      await authRepository.register(registerUserRequest);
+    } on CustomError catch (e) {
+      return e.message;
+    } catch (e) {
+      return 'No se pudo registrar el usuario';
+    }
+    await loginUser(registerUserRequest.username, registerUserRequest.password);
+    return null;
   }
 
   void checkAuthStatus() async {

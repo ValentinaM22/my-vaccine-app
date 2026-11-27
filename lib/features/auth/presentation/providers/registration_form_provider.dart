@@ -17,7 +17,7 @@ final registrationFormProvider = StateNotifierProvider.autoDispose<
 });
 
 class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
-  final Function(RegisterUserRequest) registerUserCallback;
+  final Future<String?> Function(RegisterUserRequest) registerUserCallback;
   RegistrationFormNotifier(this.registerUserCallback)
       : super(RegistrationFormState());
 
@@ -115,9 +115,13 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
     );
   }
 
-  void onFormSubmit() async {
+  /// Devuelve null si el registro salió bien, o un mensaje de error para mostrar.
+  Future<String?> onFormSubmit() async {
     _touchEveryField();
-    if (!state.isValid) return;
+    if (!state.isValid) return 'Revisa los campos marcados en rojo';
+    if (state.password.value != state.confirmPassword.value) {
+      return 'Las contraseñas no coinciden';
+    }
 
     final registerUserRequest = RegisterUserRequest(
       username: state.email.value,
@@ -127,7 +131,7 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
       birthdate: DateTime.parse(state.birthdate.value),
     );
 
-    await registerUserCallback(registerUserRequest);
+    return registerUserCallback(registerUserRequest);
   }
 
   void _touchEveryField() {

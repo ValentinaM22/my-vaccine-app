@@ -73,6 +73,14 @@ class _RegisterForm extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  // Envía el formulario y muestra el error si la API (o el formulario) lo rechaza.
+  // Si sale bien, se inicia sesión automáticamente y el router lleva al Home.
+  Future<void> _submit(BuildContext context, WidgetRef ref) async {
+    final error = await ref.read(registrationFormProvider.notifier).onFormSubmit();
+    if (!context.mounted) return;
+    showSnackbar(context, error ?? 'Cuenta creada correctamente');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final registrationForm = ref.watch(registrationFormProvider);
@@ -117,7 +125,7 @@ class _RegisterForm extends ConsumerWidget {
             label: 'Contraseña',
             obscureText: true,
             onChanged: ref.read(registrationFormProvider.notifier).onPasswordChanged,
-            onFieldSubmitted: (_) => ref.read(registrationFormProvider.notifier).onFormSubmit(),
+            onFieldSubmitted: (_) => _submit(context, ref),
             errorMessage: registrationForm.isFormPosted ? registrationForm.password.errorMessage : null,
           ),
           const SizedBox(height: 30),
@@ -125,7 +133,7 @@ class _RegisterForm extends ConsumerWidget {
             label: 'Repita la contraseña',
             obscureText: true,
             onChanged: ref.read(registrationFormProvider.notifier).onConfirmPasswordChanged,
-            onFieldSubmitted: (_) => ref.read(registrationFormProvider.notifier).onFormSubmit(),
+            onFieldSubmitted: (_) => _submit(context, ref),
             errorMessage: registrationForm.isFormPosted ? registrationForm.confirmPassword.errorMessage : null,
           ),
           const SizedBox(height: 30),
@@ -141,7 +149,7 @@ class _RegisterForm extends ConsumerWidget {
             child: CustomFilledButton(
               text: 'Crear',
               buttonColor: secondaryColor,
-              onPressed:  () => ref.read(registrationFormProvider.notifier).onFormSubmit()
+              onPressed:  () => _submit(context, ref)
             ),
           ),
           const SizedBox(height: 30),

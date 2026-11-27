@@ -65,8 +65,16 @@ class AuthDataSourceImpl extends AuthDataSource {
       );
 
       
-    } on DioError catch (e) {
-      throw Exception('Failed to register user: ${e.response?.data ?? e.message}');
+    } on DioException catch (e) {
+      // La API responde { isSuccess: false, errors: [...] } cuando algo falla (p. ej. la contraseña).
+      final data = e.response?.data;
+      if (data is Map && data['errors'] is List && (data['errors'] as List).isNotEmpty) {
+        throw CustomError((data['errors'] as List).join('\n'));
+      }
+      if (e.response == null) {
+        throw CustomError('No se pudo conectar con la API (${Environment.apiUrl})');
+      }
+      throw CustomError('No se pudo registrar el usuario');
     }
   }
 

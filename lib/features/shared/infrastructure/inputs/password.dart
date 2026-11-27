@@ -8,7 +8,8 @@ class Password extends FormzInput<String, PasswordError> {
 
 
   static final RegExp passwordRegExp = RegExp(
-    r'(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$',
+    // Mismas reglas que la API (ASP.NET Identity): número, mayúscula, minúscula y un símbolo.
+    r'^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9]).*$',
   );
 
   // Call super.pure to represent an unmodified form input.
@@ -22,8 +23,8 @@ class Password extends FormzInput<String, PasswordError> {
     if ( isValid || isPure ) return null;
 
     if ( displayError == PasswordError.empty ) return 'El campo es requerido';
-    if ( displayError == PasswordError.length ) return 'Mínimo 6 caracteres';
-    if ( displayError == PasswordError.format ) return 'Debe de tener Mayúscula, letras y un número';
+    if ( displayError == PasswordError.length ) return 'Mínimo 8 caracteres';
+    if ( displayError == PasswordError.format ) return 'Debe tener mayúscula, minúscula, un número y un símbolo (ej: !)';
 
     return null;
   }
@@ -34,7 +35,7 @@ class Password extends FormzInput<String, PasswordError> {
   PasswordError? validator(String value) {
 
     if ( value.isEmpty || value.trim().isEmpty ) return PasswordError.empty;
-    if ( value.length < 6 ) return PasswordError.length;
+    if ( value.length < 8 ) return PasswordError.length;
     if ( !passwordRegExp.hasMatch(value) ) return PasswordError.format;
 
     return null;
